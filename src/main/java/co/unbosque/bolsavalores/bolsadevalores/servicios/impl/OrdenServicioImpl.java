@@ -53,6 +53,7 @@ public class OrdenServicioImpl implements OrdenServicio{
             String nombreComisionista = comisionistaServicio.obtenerPorId(orden.getFkComisionista()).getNombre();
 
             OrdenCompraVentaDTO dto = new OrdenCompraVentaDTO(
+                orden.getId(),
                 orden.getTipo(),
                 orden.getEstado(),
                 orden.getFechaCreacion(),
@@ -63,6 +64,35 @@ public class OrdenServicioImpl implements OrdenServicio{
             ordenesDTO.add(dto);
         }
         return ordenesDTO;
+    }
+
+    @Override
+    public List<OrdenCompraVentaDTO> listarOrdenesConNombresPorComisionista(Long idComisionista) {
+        List<OrdenCompraVenta> ordenes = ordenRepositorio.encontrarOrdenPorComisionista(idComisionista);
+        List<OrdenCompraVentaDTO> ordenesDTO = new ArrayList<>();
+
+        for(OrdenCompraVenta orden : ordenes){
+            String nombreEmpresa = empresaServicio.obtenerPorId(orden.getFkEmpresa()).getNombre();
+            String nombreInversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista()).getNombre();
+            String nombreComisionista = comisionistaServicio.obtenerPorId(orden.getFkComisionista()).getNombre();
+            
+            OrdenCompraVentaDTO dto = new OrdenCompraVentaDTO(
+                orden.getId(),
+                orden.getTipo(),
+                orden.getEstado(),
+                orden.getFechaCreacion(),
+                nombreEmpresa,
+                nombreInversionista,
+                nombreComisionista
+            );
+            ordenesDTO.add(dto);
+        }
+        return ordenesDTO;
+    }
+
+    @Override
+    public OrdenCompraVenta obtenerPorId(Long idOrden) {
+        return ordenRepositorio.getReferenceById(idOrden);
     } 
 
 }

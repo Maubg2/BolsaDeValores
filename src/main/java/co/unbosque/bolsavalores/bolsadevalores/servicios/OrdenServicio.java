@@ -12,4 +12,8 @@ public interface OrdenServicio {
 
     public List<OrdenCompraVentaDTO> listarOrdenesConNombres(Long idInversionista);
 
+    public List<OrdenCompraVentaDTO> listarOrdenesConNombresPorComisionista(Long idComisionista);
+
+    public OrdenCompraVenta obtenerPorId(Long idOrden);
+
 }

@@ -11,4 +11,6 @@ public interface ComisionistaServicio {
 
     public boolean validarCredenciales(String email, String contrasena);
 
+    public Comisionista guardarComisionista(Comisionista comisionista);
+
 }

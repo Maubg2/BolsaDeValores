@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class OrdenCompraVentaDTO {
 
+    private Long id;
     private String tipo;
     private String estado;
     private Date fechaCreacion;
@@ -16,8 +17,9 @@ public class OrdenCompraVentaDTO {
     private String nombreInversionista;
     private String nombreComisionista;
 
-    public OrdenCompraVentaDTO(String tipo, String estado, Date fechaCreacion,
+    public OrdenCompraVentaDTO(Long id, String tipo, String estado, Date fechaCreacion,
                                String nombreEmpresa, String nombreInversionista, String nombreComisionista) {
+        this.id = id;
         this.tipo = tipo;
         this.estado = estado;
         this.fechaCreacion = fechaCreacion;

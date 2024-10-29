@@ -13,4 +13,7 @@ public interface OrdenRepositorio extends JpaRepository<OrdenCompraVenta, Long>{
     @Query("SELECT o FROM OrdenCompraVenta o WHERE o.fkInversionista=?1")
     public List<OrdenCompraVenta> encontrarOrdenPorInversionista(Long idInversionista);
 
+    @Query("SELECT o FROM OrdenCompraVenta o WHERE o.fkComisionista=?1")
+    public List<OrdenCompraVenta> encontrarOrdenPorComisionista(Long idComisionista);
+
 }
