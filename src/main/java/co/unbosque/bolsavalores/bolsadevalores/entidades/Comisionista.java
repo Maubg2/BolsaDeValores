@@ -26,4 +26,17 @@ public class Comisionista {
 
     private Double saldo;
 
+    public Comisionista(Long id, String nombre, String email, String contrasena, Double saldo) {
+        this.id = id;
+        this.nombre = nombre;
+        this.email = email;
+        this.contrasena = contrasena;
+        this.saldo = saldo;
+    }
+
+    public Comisionista() {
+    }
+
+    
+
 }

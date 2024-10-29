@@ -1,20 +1,42 @@
 package co.unbosque.bolsavalores.bolsadevalores.controladores;
 
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.ui.Model;
 
+import co.unbosque.bolsavalores.bolsadevalores.entidades.Comisionista;
+import co.unbosque.bolsavalores.bolsadevalores.entidades.Empresa;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
+import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
+import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompraVentaDTO;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.OrdenServicio;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class InversionistaControlador {
 
     @Autowired
     private InversionistaServicio inversionistaServicio;
+
+    @Autowired
+    private EmpresaServicio empresaServicio;
+
+    @Autowired
+    private OrdenServicio ordenServicio;
+
+    @Autowired
+    private ComisionistaServicio comisionistaServicio;
 
     @GetMapping("/index")
     public String index(){
@@ -24,15 +46,22 @@ public class InversionistaControlador {
     @GetMapping("/login")
     public String login(Model model){
         model.addAttribute("inversionista", new Inversionista());
+        model.addAttribute("comisionista", new Comisionista());
         return "login";
     }
 
     @PostMapping("/login")
-    public String validarCredenciales(@ModelAttribute("inversionista") Inversionista inversionista, Model model){
+    public String validarCredenciales(@ModelAttribute("inversionista") Inversionista inversionista, 
+                @ModelAttribute("comisionista") Comisionista comisionista, Model model, HttpSession session){
+        
         Inversionista inversionistaBD = inversionistaServicio.obtenerPorEmail(inversionista.getEmail());
+        Comisionista comisionistaBD = comisionistaServicio.obtenerPorEmail(comisionista.getEmail());
         if(inversionistaServicio.validarCredenciales(inversionista.getEmail(), inversionista.getContrasena())){
-
-            return "redirect:/portalInversionista";
+            session.setAttribute("inversionista", inversionistaBD);
+            return "redirect:/listarEmpresas";
+        }else if(comisionistaServicio.validarCredenciales(comisionista.getEmail(), comisionista.getContrasena())){
+            session.setAttribute("comisionista", comisionistaBD);
+            return "redirect:/portalComisionista";
         }else{
             model.addAttribute("mensajeError1", "Usuario y/o contraseña incorrectos");
             return "/index";
@@ -64,5 +93,64 @@ public class InversionistaControlador {
             return "registrar";
         }
     }
+
+    @GetMapping("/listarEmpresas")
+    public String listarEmpresas(Model model, HttpSession session){
+        List<Empresa> empresas = empresaServicio.listarEmpresas();
+        Long idInversionista = ((Inversionista) session.getAttribute("inversionista")).getId();
+        model.addAttribute("empresas", empresas);
+        model.addAttribute("idInversionista", idInversionista);
+        return "listarEmpresas";
+    }
+
+    @GetMapping("/listarEmpresas/{idEmpresa}/{idInversionista}")
+    public String crearOrden(@PathVariable Long idEmpresa, @PathVariable Long idInversionista, RedirectAttributes redirectAttributes){
+        
+        Inversionista inversionista = inversionistaServicio.obtenerPorId(idInversionista);
+        Empresa empresa = empresaServicio.obtenerPorId(idEmpresa);
+
+        if(inversionista.getSaldo() >= empresa.getValorAccion()){
+            OrdenCompraVenta orden = new OrdenCompraVenta();
+            orden.setTipo("compra");
+            orden.setEstado("pendiente");
+            orden.setFechaCreacion(new Date());
+            orden.setFkEmpresa(idEmpresa);
+            orden.setFkInversionista(idInversionista);
+            orden.setFkComisionista(1L);
+
+       //     inversionista.setSaldo(inversionista.getSaldo() - empresa.getValorAccion());
+
+       //     inversionistaServicio.guardarInversionista(inversionista);
+            ordenServicio.guardarOrden(orden);
+
+        //    redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+        //    redirectAttributes.addFlashAttribute("mensaje", "Orden creada con éxito");
+            
+            return "redirect:/listarEmpresas";
+        }else{
+        //    redirectAttributes.addFlashAttribute("tipoMensaje", "error");
+        //    redirectAttributes.addFlashAttribute("mensaje", "No cuenta con suficiente saldo");
+            return "listarEmpresas";
+        }
+       
+        
+    }
+/*
+    @GetMapping("/listarOrdenes")
+    public String listarOrdenes(Model model, HttpSession session){
+        Inversionista inversionista = (Inversionista)session.getAttribute("inversionista");
+        List<OrdenCompraVenta> ordenes = ordenServicio.listarOrdenesPorInversionista(inversionista.getId());
+        model.addAttribute("ordenes", ordenes);
+        return "listarOrdenes";
+    }*/
+
+    @GetMapping("/listarOrdenes")
+    public String listarOrdenes(Model model, HttpSession session) {
+        Inversionista inversionista = (Inversionista) session.getAttribute("inversionista");
+        List<OrdenCompraVentaDTO> ordenesDTO = ordenServicio.listarOrdenesConNombres(inversionista.getId());
+        model.addAttribute("ordenes", ordenesDTO);
+        return "listarOrdenes";
+    }
+
 
 }

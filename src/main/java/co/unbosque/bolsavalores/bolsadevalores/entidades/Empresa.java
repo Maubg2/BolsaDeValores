@@ -1,5 +1,6 @@
 package co.unbosque.bolsavalores.bolsadevalores.entidades;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,8 +25,10 @@ public class Empresa {
 
     private String pais;
 
+    @Column(name = "valor_accion")
     private Double valorAccion;
 
+    @Column(name = "variacion_accion")
     private Double variacionAccion;
 
     public Empresa(Long id, String nombre, String sector, String pais, Double valorAccion, Double variacionAccion) {

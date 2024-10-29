@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.repositorios.InversionistaRepositorio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
+import jakarta.transaction.Transactional;
 
 @Service
 public class InversionistaServicioImpl implements InversionistaServicio{
@@ -31,8 +32,14 @@ public class InversionistaServicioImpl implements InversionistaServicio{
     }
 
     @Override
+    @Transactional
     public Inversionista guardarInversionista(Inversionista inversionista) {
         return inversionistaRepositorio.save(inversionista);
+    }
+
+    @Override
+    public Inversionista obtenerPorId(Long id) {
+        return inversionistaRepositorio.getReferenceById(id);
     }
 
 }

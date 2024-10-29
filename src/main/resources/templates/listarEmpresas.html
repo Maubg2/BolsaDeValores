@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Listado empresas</title>
+    <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-md bg-dark navbar-dark">
+        <a class="navbar-brand" href="#">Portal de inversionistas</a>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" th:href="@{/listarEmpresas}">Invertir</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/listarOrdenes}">Ordenes</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/generarReportes}">Reportes</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/index}">Cerrar sesión</a></li>
+            </ul>
+        </div>
+    </nav>   
+    <br>
+    <div th:if="${not #lists.isEmpty(empresas)}">
+        <h3 class="text-center">Empresas</h3>
+        <br>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Sector</th>
+                    <th>País</th>
+                    <th>Valor acción</th>
+                    <th>Variación acción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="empresa : ${empresas}">
+                    <td><span th:text="${empresa.nombre} ?: 'No hay '"></span></td>
+                    <td><span th:text="${empresa.sector} ?: 'No hay '"></span></td>
+                    <td><span th:text="${empresa.pais} ?: 'No hay '"></span></td>
+                    <td><span th:text="${empresa.valorAccion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${empresa.variacionAccion} ?: 'No hay '"></span></td>
+                    <td>
+                        <a class="btn btn-primary" th:href="@{'/listarEmpresas/' + ${empresa.id} + '/' + ${idInversionista}}">Modificar</a>
+                    </td> 
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -10,4 +10,6 @@ public interface InversionistaServicio {
 
     public Inversionista guardarInversionista(Inversionista inversionista);
 
+    public Inversionista obtenerPorId(Long id);
+
 }
