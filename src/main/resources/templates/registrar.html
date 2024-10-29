@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+ <meta charset="utf-8">
+    <title>Registro de Usuario</title>
+    <!-- CSS only -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        /*    background-image: url('https://static.vecteezy.com/system/resources/previews/003/381/226/non_2x/continuous-one-line-drawing-of-airplane-minimalism-hand-drawn-vector.jpg	');  Reemplaza 'tu_imagen_de_fondo.jpg' con la ruta de tu imagen */
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .card {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #000000;
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            color: #555;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .btn-success {
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+	
+	<br>
+	<div class="container">
+		<div class="row">
+			<div
+				class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+				<h1 class="text-center">Registro usuario</h1>
+				<div class="card-body">
+
+					<form th:action="@{/index}" th:object="${inversionista}" method="POST">
+						
+						<div class="form-group">
+							<label>Nombre completo: </label> <input type="text" name="nombre"
+								th:field="*{nombre}" class="form-control"
+								placeholder="Digite su nombre completo: " required>
+						</div>
+						
+						
+						<div class="form-group">
+							<label>Contraseña : </label> <input type="password" name="contrasena"
+								th:field="*{contrasena}" class="form-control"
+								placeholder="Digite su contraseña: " required>
+						</div>
+
+                        <div class="form-group">
+							<label>Correo: </label> <input type="text" name="email"
+								th:field="*{email}" class="form-control"
+								placeholder="Digite su email: " required>
+						</div>
+  
+						<div class="box-footer">
+							<button class="btn btn-success">Guardar</button>
+						</div>
+						
+					</form>
+					
+					<script th:if="${mensajeError}">
+                        alert("El username ya existe.");
+                    </script>
+					
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
