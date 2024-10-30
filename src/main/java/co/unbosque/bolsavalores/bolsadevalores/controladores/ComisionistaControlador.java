@@ -8,13 +8,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
+import co.unbosque.bolsavalores.bolsadevalores.entidades.Accion;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Comisionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Empresa;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompraVentaDTO;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.AccionServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
@@ -35,6 +36,9 @@ public class ComisionistaControlador {
 
     @Autowired
     private ComisionistaServicio comisionistaServicio;
+
+    @Autowired
+    private AccionServicio accionServicio;
 
     @GetMapping("/portalComisionista")
     public String portalComisionista(){
@@ -68,6 +72,13 @@ public class ComisionistaControlador {
 
             comisionista.setSaldo(empresa.getValorAccion() * 0.10);
             comisionistaServicio.guardarComisionista(comisionista);
+
+            Accion accion = new Accion();
+            accion.setCantAcciones(1);
+            accion.setFkEmpresa(orden.getFkEmpresa());
+            accion.setFkInversionista(orden.getFkComisionista());
+            accionServicio.guardarAccion(accion);
+            
         }
 
         return "redirect:/portalComisionista";
