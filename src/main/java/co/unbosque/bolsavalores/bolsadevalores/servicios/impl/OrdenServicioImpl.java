@@ -2,6 +2,7 @@ package co.unbosque.bolsavalores.bolsadevalores.servicios.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,11 @@ public class OrdenServicioImpl implements OrdenServicio{
     public List<OrdenCompraVenta> listarOrdenesPorInversionista(Long idInversionista) {
         return ordenRepositorio.encontrarOrdenPorInversionista(idInversionista);
     }
+
+    @Override
+    public List<OrdenCompraVenta> listarOrdenesPorComisionista(Long idComisionista) {
+        return ordenRepositorio.encontrarOrdenPorComisionista(idComisionista);
+    } 
 
     @Override
     public List<OrdenCompraVentaDTO> listarOrdenesConNombres(Long idInversionista) {
@@ -93,6 +99,16 @@ public class OrdenServicioImpl implements OrdenServicio{
     @Override
     public OrdenCompraVenta obtenerPorId(Long idOrden) {
         return ordenRepositorio.getReferenceById(idOrden);
-    } 
+    }
+
+    @Override
+    @Transactional
+    public Optional<OrdenCompraVenta> cancelarOrden(Long idOrden) {
+        Optional<OrdenCompraVenta> optOrden = ordenRepositorio.findById(idOrden);
+        optOrden.ifPresent(orden -> {
+            ordenRepositorio.delete(orden);
+        });
+        return optOrden;
+    }
 
 }

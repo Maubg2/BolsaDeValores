@@ -1,5 +1,6 @@
 package co.unbosque.bolsavalores.bolsadevalores.controladores;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,11 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.ui.Model;
 
+import co.unbosque.bolsavalores.bolsadevalores.entidades.Accion;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Comisionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Empresa;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompraVentaDTO;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.AccionServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
@@ -37,6 +40,9 @@ public class InversionistaControlador {
 
     @Autowired
     private ComisionistaServicio comisionistaServicio;
+
+    @Autowired
+    private AccionServicio accionServicio;
 
     @GetMapping("/index")
     public String index(){
@@ -97,9 +103,18 @@ public class InversionistaControlador {
     @GetMapping("/listarEmpresas")
     public String listarEmpresas(Model model, HttpSession session){
         List<Empresa> empresas = empresaServicio.listarEmpresas();
-        Long idInversionista = ((Inversionista) session.getAttribute("inversionista")).getId();
+        Inversionista inversionista = (Inversionista)session.getAttribute("inversionista");
+
+        List<Accion> accionesPorInversionista = accionServicio.listarAccionesPorInversionista(inversionista.getId());
+        List<Empresa> empresasParaVender = new ArrayList<>();
+        for(Accion x : accionesPorInversionista){
+            empresasParaVender.add(empresaServicio.obtenerPorId(x.getFkEmpresa()));
+        }
+
         model.addAttribute("empresas", empresas);
-        model.addAttribute("idInversionista", idInversionista);
+        model.addAttribute("inversionista", inversionista);
+        model.addAttribute("idInversionista", inversionista.getId());
+        model.addAttribute("empresasVender", empresasParaVender);
         return "listarEmpresas";
     }
 
@@ -130,19 +145,15 @@ public class InversionistaControlador {
         }else{
         //    redirectAttributes.addFlashAttribute("tipoMensaje", "error");
         //    redirectAttributes.addFlashAttribute("mensaje", "No cuenta con suficiente saldo");
-            return "listarEmpresas";
+            return "redirect:/listarEmpresas";
         }
        
-        
     }
-/*
-    @GetMapping("/listarOrdenes")
-    public String listarOrdenes(Model model, HttpSession session){
-        Inversionista inversionista = (Inversionista)session.getAttribute("inversionista");
-        List<OrdenCompraVenta> ordenes = ordenServicio.listarOrdenesPorInversionista(inversionista.getId());
-        model.addAttribute("ordenes", ordenes);
-        return "listarOrdenes";
-    }*/
+
+    @GetMapping("/listarEmpresas")
+    public String crearOrdenVenta(){
+        return "";
+    }
 
     @GetMapping("/listarOrdenes")
     public String listarOrdenes(Model model, HttpSession session) {
@@ -150,6 +161,12 @@ public class InversionistaControlador {
         List<OrdenCompraVentaDTO> ordenesDTO = ordenServicio.listarOrdenesConNombres(inversionista.getId());
         model.addAttribute("ordenes", ordenesDTO);
         return "listarOrdenes";
+    }
+
+    @GetMapping("/cancelarOrden/{ordenId}")
+    public String cancelarOrden(@PathVariable Long ordenId){
+        ordenServicio.cancelarOrden(ordenId);
+        return "redirect:/listarOrdenes";
     }
 
 

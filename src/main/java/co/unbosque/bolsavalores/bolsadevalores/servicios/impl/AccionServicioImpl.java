@@ -1,5 +1,7 @@
 package co.unbosque.bolsavalores.bolsadevalores.servicios.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,11 @@ public class AccionServicioImpl implements AccionServicio{
     @Transactional
     public Accion guardarAccion(Accion accion) {
         return accionRepositorio.save(accion);
+    }
+
+    @Override
+    public List<Accion> listarAccionesPorInversionista(Long idInversionista) {
+        return accionRepositorio.listarAccionPorInversionista(idInversionista);
     }
 
 }

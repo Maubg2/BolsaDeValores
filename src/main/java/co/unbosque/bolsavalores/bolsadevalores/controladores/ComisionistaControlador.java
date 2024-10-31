@@ -1,5 +1,6 @@
 package co.unbosque.bolsavalores.bolsadevalores.controladores;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import co.unbosque.bolsavalores.bolsadevalores.entidades.Comisionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Empresa;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
+import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompletaDTO;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompraVentaDTO;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.AccionServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
@@ -48,8 +50,29 @@ public class ComisionistaControlador {
     @GetMapping("/listarOrdenesCom")
     public String listarOrdenesCom(HttpSession session, Model model){
         Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
-        List<OrdenCompraVentaDTO> ordenesDTO = ordenServicio.listarOrdenesConNombresPorComisionista(comisionista.getId());
+        List<OrdenCompraVenta> ordenesConFk = ordenServicio.listarOrdenesPorComisionista(comisionista.getId());
+        List<OrdenCompletaDTO> ordenesDTO = new ArrayList<>();
+
+        for (OrdenCompraVenta orden : ordenesConFk) {
+            OrdenCompletaDTO dto = new OrdenCompletaDTO();
+            dto.setId(orden.getId());
+            dto.setTipo(orden.getTipo());
+            dto.setEstado(orden.getEstado());
+            dto.setFechaCreacion(orden.getFechaCreacion());
+
+            Empresa empresa = empresaServicio.obtenerPorId(orden.getFkEmpresa());
+            Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
+            dto.setNombreEmpresa(empresa != null ? empresa.getNombre() : "No hay");
+            dto.setValorAccion(empresa.getValorAccion());
+            dto.setVariacionAccion(empresa.getVariacionAccion());
+
+            dto.setNombreInversionista(inversionista != null ? inversionista.getNombre() : "No hay");
+            dto.setSaldo(inversionista.getSaldo());
+
+            ordenesDTO.add(dto);
+        }
         model.addAttribute("ordenes", ordenesDTO);
+
         return "listarOrdenesCom";
     }
 
@@ -62,7 +85,8 @@ public class ComisionistaControlador {
         Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
         Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
 
-        if(inversionista.getSaldo() >= empresa.getValorAccion()){
+        if(inversionista.getSaldo() >= empresa.getValorAccion() && orden.getEstado().equals("pendiente")){
+            System.out.println("ENTROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
             orden.setEstado("ejecutada");
             orden.setFechaCreacion(new Date());
             ordenServicio.guardarOrden(orden);

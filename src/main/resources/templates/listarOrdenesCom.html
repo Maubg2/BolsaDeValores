@@ -32,8 +32,10 @@
                     <th>Estado</th>
                     <th>Fecha ejecución</th>
                     <th>Empresa</th>
+                    <th>Valor</th>
+                    <th>Variacion</th>
                     <th>Inversionista</th>
-                    <th>Comisionista</th>
+                    <th>Saldo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -43,10 +45,12 @@
                     <td><span th:text="${orden.estado} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.fechaCreacion} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreEmpresa} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.valorAccion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.variacionAccion} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreInversionista} ?: 'No hay '"></span></td>
-                    <td><span th:text="${orden.nombreComisionista} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.saldo} ?: 'No hay '"></span></td>
                     <td>
-						<a class="btn btn-primary" th:href="@{'/listarOrdenesCom/' + ${orden.id}}">Pagar orden</a>
+						<a class="btn btn-primary" th:if="${orden.estado == 'pendiente'}" th:href="@{'/listarOrdenesCom/' + ${orden.id}}">Pagar orden</a>
 					</td>
                 </tr>
             </tbody>
