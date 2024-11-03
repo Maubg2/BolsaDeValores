@@ -1,6 +1,7 @@
 package co.unbosque.bolsavalores.bolsadevalores.servicios.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,21 @@ public class AccionServicioImpl implements AccionServicio{
     @Override
     public List<Accion> listarAccionesPorInversionista(Long idInversionista) {
         return accionRepositorio.listarAccionPorInversionista(idInversionista);
+    }
+
+    @Override
+    @Transactional
+    public Optional<Accion> eliminarAccion(Long idAccion) {
+        Optional<Accion> optAccion = accionRepositorio.findById(idAccion);
+        optAccion.ifPresent(accion ->{
+            accionRepositorio.delete(accion);
+        });
+        return optAccion;
+    }
+
+    @Override
+    public Accion obtenerPorId(Long idAccion) {
+        return accionRepositorio.getReferenceById(idAccion);
     }
 
 }

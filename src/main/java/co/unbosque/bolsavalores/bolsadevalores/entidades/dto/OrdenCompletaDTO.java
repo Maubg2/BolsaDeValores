@@ -18,9 +18,10 @@ public class OrdenCompletaDTO {
     private Double variacionAccion;
     private String nombreInversionista;
     private Double saldo;
+    private Long fkAccion;
     
     public OrdenCompletaDTO(Long id, String tipo, String estado, Date fechaCreacion, String nombreEmpresa,
-            Double valorAccion, Double variacionAccion, String nombreInversionista, Double saldo) {
+            Double valorAccion, Double variacionAccion, String nombreInversionista, Double saldo, Long fkAccion) {
         this.id = id;
         this.tipo = tipo;
         this.estado = estado;
@@ -30,6 +31,7 @@ public class OrdenCompletaDTO {
         this.variacionAccion = variacionAccion;
         this.nombreInversionista = nombreInversionista;
         this.saldo = saldo;
+        this.fkAccion = fkAccion;
     }
     public OrdenCompletaDTO() {
     }

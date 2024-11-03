@@ -59,7 +59,7 @@
 
 
 
-    <div th:if="${not #lists.isEmpty(empresasVender)}">
+    <div th:if="${not #lists.isEmpty(empresasConAccion)}">
         
         <br>
         <h5 class="text-center">Venta de acciones</h5>
@@ -75,15 +75,15 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="empresa : ${empresasVender}">
+                <tr th:each="empresa : ${empresasConAccion}">
                     <td><span th:text="${empresa.nombre} ?: 'No hay '"></span></td>
                     <td><span th:text="${empresa.sector} ?: 'No hay '"></span></td>
                     <td><span th:text="${empresa.pais} ?: 'No hay '"></span></td>
                     <td><span th:text="${empresa.valorAccion} ?: 'No hay '"></span></td>
                     <td><span th:text="${empresa.variacionAccion} ?: 'No hay '"></span></td>
                     <td>
-                        <a class="btn btn-primary" th:href="@{'/listarEmpresas/' + ${empresa.id} + '/' + ${idInversionista}}">Crear orden venta</a>
-                    </td> 
+                        <a class="btn btn-primary" th:href="@{'/listarEmpresas/' + ${empresa.id} + '/' + ${idInversionista} + '/' + ${empresa.fkAccion}}">Crear orden venta</a>
+                    </td>    
                 </tr>
             </tbody>
         </table>

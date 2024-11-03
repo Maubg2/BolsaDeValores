@@ -23,7 +23,7 @@
 	
     <br>
     <div th:if="${not #lists.isEmpty(ordenes)}">
-        <h3 class="text-center">Órdenes de compra y venta</h3>
+        <h3 class="text-center">Órdenes de compra</h3>
         <br>
         <table class="table">
             <thead>
@@ -56,6 +56,47 @@
             </tbody>
         </table>
     </div>
+
+
+
+    <br>
+    <div th:if="${not #lists.isEmpty(ordenesVenta)}">
+        <h3 class="text-center">Órdenes de venta</h3>
+        <br>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Fecha ejecución</th>
+                    <th>Empresa</th>
+                    <th>Valor</th>
+                    <th>Variacion</th>
+                    <th>Inversionista</th>
+                    <th>Saldo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="orden : ${ordenesVenta}">
+                    <td><span th:text="${orden.tipo} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.estado} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.fechaCreacion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.nombreEmpresa} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.valorAccion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.variacionAccion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.nombreInversionista} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.saldo} ?: 'No hay '"></span></td>
+                    <td>
+						<a class="btn btn-primary" th:if="${orden.estado == 'pendiente'}" th:href="@{'/listarOrdenesCom/' + ${orden.id} + '/' + ${orden.fkAccion}}">Vender accion</a>
+					</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+
 
 </body>
 </html>

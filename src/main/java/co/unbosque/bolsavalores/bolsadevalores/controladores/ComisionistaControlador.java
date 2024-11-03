@@ -15,6 +15,7 @@ import co.unbosque.bolsavalores.bolsadevalores.entidades.Comisionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Empresa;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
+import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenSoloVenta;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompletaDTO;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompraVentaDTO;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.AccionServicio;
@@ -22,6 +23,7 @@ import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.OrdenServicio;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.OrdenVentaServicio;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -42,6 +44,9 @@ public class ComisionistaControlador {
     @Autowired
     private AccionServicio accionServicio;
 
+    @Autowired
+    private OrdenVentaServicio ordenVentaServicio;
+
     @GetMapping("/portalComisionista")
     public String portalComisionista(){
         return "portalComisionista";
@@ -49,7 +54,9 @@ public class ComisionistaControlador {
 
     @GetMapping("/listarOrdenesCom")
     public String listarOrdenesCom(HttpSession session, Model model){
+
         Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
+
         List<OrdenCompraVenta> ordenesConFk = ordenServicio.listarOrdenesPorComisionista(comisionista.getId());
         List<OrdenCompletaDTO> ordenesDTO = new ArrayList<>();
 
@@ -71,7 +78,32 @@ public class ComisionistaControlador {
 
             ordenesDTO.add(dto);
         }
+
+        List<OrdenSoloVenta> ordenesVentaConFk = ordenVentaServicio.listarOrdenesVentaPorComisionista(comisionista.getId());
+        List<OrdenCompletaDTO> ordenesVentaDTO = new ArrayList<>();
+
+        for(OrdenSoloVenta orden : ordenesVentaConFk){
+            OrdenCompletaDTO dtoVenta = new OrdenCompletaDTO();
+            dtoVenta.setId(orden.getId());
+            dtoVenta.setTipo(orden.getTipo());
+            dtoVenta.setEstado(orden.getEstado());
+            dtoVenta.setFechaCreacion(orden.getFechaCreacion());
+            dtoVenta.setFkAccion(orden.getFkAccion());
+
+            Empresa empresa = empresaServicio.obtenerPorId(orden.getFkEmpresa());
+            Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
+            dtoVenta.setNombreEmpresa(empresa != null ? empresa.getNombre() : "No hay");
+            dtoVenta.setValorAccion(empresa.getValorAccion());
+            dtoVenta.setVariacionAccion(empresa.getVariacionAccion());
+
+            dtoVenta.setNombreInversionista(inversionista != null ? inversionista.getNombre() : "No hay");
+            dtoVenta.setSaldo(inversionista.getSaldo());
+
+            ordenesVentaDTO.add(dtoVenta);
+        }
+
         model.addAttribute("ordenes", ordenesDTO);
+        model.addAttribute("ordenesVenta", ordenesVentaDTO);
 
         return "listarOrdenesCom";
     }
@@ -86,7 +118,6 @@ public class ComisionistaControlador {
         Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
 
         if(inversionista.getSaldo() >= empresa.getValorAccion() && orden.getEstado().equals("pendiente")){
-            System.out.println("ENTROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
             orden.setEstado("ejecutada");
             orden.setFechaCreacion(new Date());
             ordenServicio.guardarOrden(orden);
@@ -104,6 +135,32 @@ public class ComisionistaControlador {
             accionServicio.guardarAccion(accion);
             
         }
+
+        return "redirect:/portalComisionista";
+    }
+
+    @GetMapping("/listarOrdenesCom/{idOrden}/{idAccion}")
+    public String aceptarOrdenVenta(@PathVariable Long idOrden, @PathVariable Long idAccion, HttpSession session){
+        
+        OrdenSoloVenta ordenVenta = ordenVentaServicio.obtenerPorId(idOrden);
+
+        Empresa empresa = empresaServicio.obtenerPorId(ordenVenta.getFkEmpresa());
+        Inversionista inversionista = inversionistaServicio.obtenerPorId(ordenVenta.getFkInversionista());
+        Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
+
+        ordenVenta.setEstado("ejecutada");
+        ordenVenta.setFechaCreacion(new Date());
+        ordenVentaServicio.guardarOrdenVenta(ordenVenta);
+
+        inversionista.setSaldo(inversionista.getSaldo() + empresa.getValorAccion());
+        inversionistaServicio.guardarInversionista(inversionista);
+
+        comisionista.setSaldo(empresa.getValorAccion() * 0.10);
+        comisionistaServicio.guardarComisionista(comisionista);
+
+        Accion accion = accionServicio.obtenerPorId(idAccion);
+        accion.setFkInversionista(null);
+        accionServicio.guardarAccion(accion);
 
         return "redirect:/portalComisionista";
     }

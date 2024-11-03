@@ -3,6 +3,7 @@ package co.unbosque.bolsavalores.bolsadevalores.controladores;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,12 +19,15 @@ import co.unbosque.bolsavalores.bolsadevalores.entidades.Comisionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Empresa;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
+import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenSoloVenta;
+import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.EmpresaConAccionDTO;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompraVentaDTO;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.AccionServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.OrdenServicio;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.OrdenVentaServicio;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -43,6 +47,9 @@ public class InversionistaControlador {
 
     @Autowired
     private AccionServicio accionServicio;
+
+    @Autowired
+    private OrdenVentaServicio ordenVentaServicio;
 
     @GetMapping("/index")
     public String index(){
@@ -106,15 +113,31 @@ public class InversionistaControlador {
         Inversionista inversionista = (Inversionista)session.getAttribute("inversionista");
 
         List<Accion> accionesPorInversionista = accionServicio.listarAccionesPorInversionista(inversionista.getId());
-        List<Empresa> empresasParaVender = new ArrayList<>();
+        List<EmpresaConAccionDTO> empresasConAccion = new ArrayList<>();
+
         for(Accion x : accionesPorInversionista){
-            empresasParaVender.add(empresaServicio.obtenerPorId(x.getFkEmpresa()));
+
+            boolean existeOrdenPendiente = ordenVentaServicio.existeOrdenPendientePorEmpresaEInversionista(x.getFkEmpresa(), inversionista.getId());
+
+            if (!existeOrdenPendiente) {        
+                EmpresaConAccionDTO empresaConAccionDTO = new EmpresaConAccionDTO();
+                Empresa empresa = empresaServicio.obtenerPorId(x.getFkEmpresa());
+                empresaConAccionDTO.setId(empresa.getId());
+                empresaConAccionDTO.setNombre(empresa.getNombre());
+                empresaConAccionDTO.setSector(empresa.getSector());
+                empresaConAccionDTO.setPais(empresa.getPais());
+                empresaConAccionDTO.setValorAccion(empresa.getValorAccion());
+                empresaConAccionDTO.setVariacionAccion(empresa.getVariacionAccion());
+                empresaConAccionDTO.setFkAccion(x.getId());
+    
+                empresasConAccion.add(empresaConAccionDTO);
+            }    
         }
 
         model.addAttribute("empresas", empresas);
         model.addAttribute("inversionista", inversionista);
         model.addAttribute("idInversionista", inversionista.getId());
-        model.addAttribute("empresasVender", empresasParaVender);
+        model.addAttribute("empresasConAccion", empresasConAccion);
         return "listarEmpresas";
     }
 
@@ -149,23 +172,41 @@ public class InversionistaControlador {
         }
        
     }
+ 
+    @GetMapping("/listarEmpresas/{idEmpresa}/{idInversionista}/{idAccion}")
+    public String crearOrdenVenta(@PathVariable Long idEmpresa, @PathVariable Long idInversionista, @PathVariable Long idAccion){
 
-    @GetMapping("/listarEmpresas")
-    public String crearOrdenVenta(){
-        return "";
+        OrdenSoloVenta ordenVenta = new OrdenSoloVenta();
+        ordenVenta.setTipo("venta");
+        ordenVenta.setEstado("pendiente");
+        ordenVenta.setFechaCreacion(new Date());
+        ordenVenta.setFkEmpresa(idEmpresa);
+        ordenVenta.setFkInversionista(idInversionista);
+        ordenVenta.setFkComisionista(1L);
+        ordenVenta.setFkAccion(idAccion);
+        
+        ordenVentaServicio.guardarOrdenVenta(ordenVenta);
+
+        return "redirect:/listarEmpresas";
     }
 
     @GetMapping("/listarOrdenes")
     public String listarOrdenes(Model model, HttpSession session) {
         Inversionista inversionista = (Inversionista) session.getAttribute("inversionista");
         List<OrdenCompraVentaDTO> ordenesDTO = ordenServicio.listarOrdenesConNombres(inversionista.getId());
+        List<OrdenCompraVentaDTO> ordenesVentaDTO = ordenVentaServicio.listarOrdenesVentaConNombres(inversionista.getId());
+        
         model.addAttribute("ordenes", ordenesDTO);
+        model.addAttribute("ordenesVenta", ordenesVentaDTO);
         return "listarOrdenes";
     }
 
     @GetMapping("/cancelarOrden/{ordenId}")
     public String cancelarOrden(@PathVariable Long ordenId){
-        ordenServicio.cancelarOrden(ordenId);
+        Optional<OrdenCompraVenta> optOrdenCompra = ordenServicio.cancelarOrden(ordenId);
+        if(!optOrdenCompra.isPresent()){
+            ordenVentaServicio.cancelarOrdenVenta(ordenId);
+        }
         return "redirect:/listarOrdenes";
     }
 
