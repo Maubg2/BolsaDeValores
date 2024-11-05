@@ -10,4 +10,8 @@ public interface EmpresaServicio {
 
     public Empresa obtenerPorId(Long id);
 
+    public void actualizarValorDeAccion();
+
+    public void calcularNuevoSaldo();
+
 }

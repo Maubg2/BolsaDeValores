@@ -1,5 +1,170 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+       /*     background-image: url('https://previews.123rf.com/images/kbibibii/kbibibii1505/kbibibii150500039/39534346-patr%C3%B3n-simple-geom%C3%A9trico-blanco-y-negro-del-vector-minimalista-vacaciones-aviones.jpg');  Reemplaza 'tu_imagen_de_fondo.jpg' con la ruta de tu imagen */
+            background-size: cover;
+            background-position: center top;
+            font-family: 'Arial', sans-serif;
+            color: #000000;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .card {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .btn-success {
+            width: 100%;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #218838;
+        }
+        /* Estilo para el fondo del modal */
+        .modal {
+            display: none;
+            /* Inicialmente oculto */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Fondo semi-transparente */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilo para el contenido del modal */
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Estilo para el botón de cerrar */
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+                <h1 class="text-center">Inicio de Sesión</h1>
+                <div class="card-body">
+                    <form th:action="@{/login}" th:object="${inversionista}" method="POST">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="text" name="email" th:field="*{email}" class="form-control" required
+                                placeholder="Escriba su correo electrónico:">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña:</label>
+                            <input type="password" name="contrasena" th:field="*{contrasena}" class="form-control" required
+                                placeholder="Escriba su contraseña:">
+                        </div>
+                        <div class="box-footer">
+                            <button class="btn btn-primary" type="submit">Iniciar sesión</button>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal personalizado -->
+    <div id="errorModal" class="modal" th:if="${mensajeError1}">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Error de inicio de sesión</h2>
+            <p>Correo o contraseña incorrectos. Por favor, inténtelo de nuevo.</p>
+        </div>
+    </div>
+
+    <script th:if="${mensajeError1}">
+        // Muestra el modal si hay un mensaje de error
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("errorModal");
+            var closeBtn = document.querySelector(".close-btn");
+
+            // Mostrar el modal
+            modal.style.display = "flex";
+
+            // Cerrar el modal cuando se hace clic en el botón de cerrar
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Cerrar el modal cuando se hace clic fuera del contenido del modal
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        });
+    </script>
+
+</body>
+
+</html>
+
+
+<!--
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="utf-8">
     <title>Login</title>
@@ -68,13 +233,15 @@
 					<form th:action="@{/login}" th:object="${inversionista}" method="POST">
 
 						<div class="form-group">
-							<label>Email: </label> <input type="text" name="email"
+							<label>Email: </label> 
+                            <input type="text" name="email"
 								th:field="*{email}" class="form-control"
 								placeholder="Ingrese su correo electrónico:" required>
 						</div>
 
 						<div class="form-group">
-							<label>Contraseña: </label> <input type="password"
+							<label>Contraseña: </label> 
+                            <input type="password"
 								name="contrasena" th:field="*{contrasena}" class="form-control"
 								placeholder="Ingrese su contraseña:" required>
 						</div>
@@ -85,10 +252,12 @@
 
 					</form>
 					
-					<script th:if="${mensajeError1}">
-                        alert("Usuario y/o contraseña incorrectos");
-                    </script>
+				
 					
+                    <script th:if="${mensajeError1}">
+                        alert(/*[[${mensajeError1}]]*/);  
+                    </script>
+
 				</div>
 			</div>
 		</div>
@@ -96,3 +265,4 @@
 
 </body>
 </html>
+-->

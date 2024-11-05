@@ -1,13 +1,54 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="utf-8">
     <title>Listado empresas</title>
-    <link rel="stylesheet"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        /* Estilo para el fondo del modal */
+        .modal2, .modal, .modal3 {
+            display: none;
+            /* Inicialmente oculto */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Fondo semi-transparente */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilo para el contenido del modal */
+        .modal-content2, .modal-content, .modal-content3 {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Estilo para el botón de cerrar */
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
 </head>
+
 <body>
 
     <nav class="navbar navbar-expand-md bg-dark navbar-dark">
@@ -21,13 +62,14 @@
             </ul>
         </div>
         <div>
-            <span style="color: white;" th:text="'Saldo de ' + ${inversionista.nombre} +': ' + ${inversionista.saldo}"></span>
+            <span style="color: white;"
+                th:text="'Saldo de ' + ${inversionista.nombre} +': ' + ${inversionista.saldo}"></span>
         </div>
-    </nav>   
+    </nav>
     <br>
     <h3 class="text-center">Empresas</h3>
     <div th:if="${not #lists.isEmpty(empresas)}">
-        
+
         <br>
         <h5 class="text-center">Compra</h5>
         <table class="table">
@@ -47,10 +89,12 @@
                     <td><span th:text="${empresa.sector} ?: 'No hay '"></span></td>
                     <td><span th:text="${empresa.pais} ?: 'No hay '"></span></td>
                     <td><span th:text="${empresa.valorAccion} ?: 'No hay '"></span></td>
-                    <td><span th:text="${empresa.variacionAccion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${empresa.variacionAccion} + '%' ?: 'No hay '"></span></td>
                     <td>
-                        <a class="btn btn-primary" th:href="@{'/listarEmpresas/' + ${empresa.id} + '/' + ${idInversionista}}">Crear orden compra</a>
-                    </td> 
+                        <a class="btn btn-primary"
+                            th:href="@{'/listarEmpresas/' + ${empresa.id} + '/' + ${idInversionista}}">Crear orden
+                            compra</a>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -60,7 +104,7 @@
 
 
     <div th:if="${not #lists.isEmpty(empresasConAccion)}">
-        
+
         <br>
         <h5 class="text-center">Venta de acciones</h5>
         <table class="table">
@@ -82,15 +126,120 @@
                     <td><span th:text="${empresa.valorAccion} ?: 'No hay '"></span></td>
                     <td><span th:text="${empresa.variacionAccion} ?: 'No hay '"></span></td>
                     <td>
-                        <a class="btn btn-primary" th:href="@{'/listarEmpresas/' + ${empresa.id} + '/' + ${idInversionista} + '/' + ${empresa.fkAccion}}">Crear orden venta</a>
-                    </td>    
+                        <a class="btn btn-primary"
+                            th:href="@{'/listarEmpresas/' + ${empresa.id} + '/' + ${idInversionista} + '/' + ${empresa.fkAccion}}">Crear
+                            orden venta</a>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    <!-- Modal personalizado -->
+    <div id="errorModal2" class="modal2" th:if="${mensajeError4}">
+        <div class="modal-content2">
+            <span class="close-btn">&times;</span>
+            <h3>Orden creada satisfactoriamente</h3>
+            <p>El comisionista revisará las condiciones</p>
+        </div>
+    </div>
+
+    <script th:if="${mensajeError4}">
+        // Muestra el modal si hay un mensaje de error
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("errorModal2");
+            var closeBtn = document.querySelector(".close-btn");
+
+            // Mostrar el modal
+            modal.style.display = "flex";
+
+            // Cerrar el modal cuando se hace clic en el botón de cerrar
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Cerrar el modal cuando se hace clic fuera del contenido del modal
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        });
+    </script>
 
 
+
+
+    <!-- Modal personalizado -->
+    <div id="errorModal" class="modal" th:if="${mensajeError5}">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3>No cuenta con suficiente saldo</h3>
+        </div>
+    </div>
+
+    <script th:if="${mensajeError5}">
+        // Muestra el modal si hay un mensaje de error
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("errorModal");
+            var closeBtn = document.querySelector(".close-btn");
+
+            // Mostrar el modal
+            modal.style.display = "flex";
+
+            // Cerrar el modal cuando se hace clic en el botón de cerrar
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Cerrar el modal cuando se hace clic fuera del contenido del modal
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        });
+    </script>
+
+
+
+
+
+
+
+
+    <!-- Modal personalizado -->
+    <div id="errorModal3" class="modal3" th:if="${mensajeError6}">
+        <div class="modal-content3">
+            <span class="close-btn">&times;</span>
+            <h3>Orden creada satisfactoriamente</h3>
+            <p>El comisionista revisará las condiciones</p>
+        </div>
+    </div>
+
+    <script th:if="${mensajeError6}">
+        // Muestra el modal si hay un mensaje de error
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("errorModal3");
+            var closeBtn = document.querySelector(".close-btn");
+
+            // Mostrar el modal
+            modal.style.display = "flex";
+
+            // Cerrar el modal cuando se hace clic en el botón de cerrar
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Cerrar el modal cuando se hace clic fuera del contenido del modal
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        });
+    </script>
 
 </body>
+
 </html>

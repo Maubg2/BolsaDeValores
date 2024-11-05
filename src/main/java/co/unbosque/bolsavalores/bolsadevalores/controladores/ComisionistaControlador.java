@@ -17,7 +17,6 @@ import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenSoloVenta;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompletaDTO;
-import co.unbosque.bolsavalores.bolsadevalores.entidades.dto.OrdenCompraVentaDTO;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.AccionServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
@@ -102,6 +101,7 @@ public class ComisionistaControlador {
             ordenesVentaDTO.add(dtoVenta);
         }
 
+        model.addAttribute("comisionista", comisionista);
         model.addAttribute("ordenes", ordenesDTO);
         model.addAttribute("ordenesVenta", ordenesVentaDTO);
 

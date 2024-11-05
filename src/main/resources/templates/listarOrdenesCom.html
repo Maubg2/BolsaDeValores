@@ -18,6 +18,9 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/index}">Cerrar sesión</a></li>
 			</ul>
 		</div>
+        <div>
+            <span style="color: white;" th:text="'Saldo de ' + ${comisionista.nombre} +': ' + ${comisionista.saldo}"></span>
+        </div>
 	</nav>   
 	<br>
 	
@@ -46,7 +49,7 @@
                     <td><span th:text="${orden.fechaCreacion} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreEmpresa} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.valorAccion} ?: 'No hay '"></span></td>
-                    <td><span th:text="${orden.variacionAccion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.variacionAccion} + '%' ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreInversionista} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.saldo} ?: 'No hay '"></span></td>
                     <td>
@@ -84,7 +87,7 @@
                     <td><span th:text="${orden.fechaCreacion} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreEmpresa} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.valorAccion} ?: 'No hay '"></span></td>
-                    <td><span th:text="${orden.variacionAccion} ?: 'No hay '"></span></td>
+                    <td><span th:text="${orden.variacionAccion} + '%' ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreInversionista} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.saldo} ?: 'No hay '"></span></td>
                     <td>

@@ -3,7 +3,6 @@ package co.unbosque.bolsavalores.bolsadevalores.controladores;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -63,21 +62,23 @@ public class InversionistaControlador {
         return "login";
     }
 
+
     @PostMapping("/login")
-    public String validarCredenciales(@ModelAttribute("inversionista") Inversionista inversionista, 
-                @ModelAttribute("comisionista") Comisionista comisionista, Model model, HttpSession session){
-        
+    public String validarCredenciales(@ModelAttribute("inversionista") Inversionista inversionista,
+            @ModelAttribute("comisionista") Comisionista comisionista, Model model, HttpSession session) {
+
         Inversionista inversionistaBD = inversionistaServicio.obtenerPorEmail(inversionista.getEmail());
         Comisionista comisionistaBD = comisionistaServicio.obtenerPorEmail(comisionista.getEmail());
-        if(inversionistaServicio.validarCredenciales(inversionista.getEmail(), inversionista.getContrasena())){
+
+        if (inversionistaServicio.validarCredenciales(inversionista.getEmail(), inversionista.getContrasena())) {
             session.setAttribute("inversionista", inversionistaBD);
             return "redirect:/listarEmpresas";
-        }else if(comisionistaServicio.validarCredenciales(comisionista.getEmail(), comisionista.getContrasena())){
+        } else if (comisionistaServicio.validarCredenciales(comisionista.getEmail(), comisionista.getContrasena())) {
             session.setAttribute("comisionista", comisionistaBD);
             return "redirect:/portalComisionista";
-        }else{
-            model.addAttribute("mensajeError1", "Usuario y/o contraseña incorrectos");
-            return "/index";
+        } else {
+            model.addAttribute("mensajeError1", true);
+            return "login";
         }
     }
 
@@ -93,16 +94,15 @@ public class InversionistaControlador {
             Inversionista comprobarInversionista = inversionistaServicio.obtenerPorEmail(inversionista.getEmail());
             if(comprobarInversionista == null){
        
-            //    usuario.setFkRol(1L);
                 inversionista.setSaldo(10000.0);
                 inversionistaServicio.guardarInversionista(inversionista);
                 return "redirect:/login";
             }else{
-                model.addAttribute("mensajeError", "Usuario ya existe");
+                model.addAttribute("mensajeError2", true);
                 return "registrar";
             }
         }catch(Exception e){
-            model.addAttribute("error", "Error, intente de nuevo");
+            model.addAttribute("mensajeError3", true);
             return "registrar";
         }
     }
@@ -142,7 +142,7 @@ public class InversionistaControlador {
     }
 
     @GetMapping("/listarEmpresas/{idEmpresa}/{idInversionista}")
-    public String crearOrden(@PathVariable Long idEmpresa, @PathVariable Long idInversionista, RedirectAttributes redirectAttributes){
+    public String crearOrden(@PathVariable Long idEmpresa, @PathVariable Long idInversionista, RedirectAttributes redirectAttributes, Model model){
         
         Inversionista inversionista = inversionistaServicio.obtenerPorId(idInversionista);
         Empresa empresa = empresaServicio.obtenerPorId(idEmpresa);
@@ -156,25 +156,20 @@ public class InversionistaControlador {
             orden.setFkInversionista(idInversionista);
             orden.setFkComisionista(1L);
 
-       //     inversionista.setSaldo(inversionista.getSaldo() - empresa.getValorAccion());
-
-       //     inversionistaServicio.guardarInversionista(inversionista);
             ordenServicio.guardarOrden(orden);
 
-        //    redirectAttributes.addFlashAttribute("tipoMensaje", "success");
-        //    redirectAttributes.addFlashAttribute("mensaje", "Orden creada con éxito");
+            redirectAttributes.addFlashAttribute("mensajeError4", true);
             
             return "redirect:/listarEmpresas";
         }else{
-        //    redirectAttributes.addFlashAttribute("tipoMensaje", "error");
-        //    redirectAttributes.addFlashAttribute("mensaje", "No cuenta con suficiente saldo");
+            redirectAttributes.addFlashAttribute("mensajeError5", true);
             return "redirect:/listarEmpresas";
         }
        
     }
  
     @GetMapping("/listarEmpresas/{idEmpresa}/{idInversionista}/{idAccion}")
-    public String crearOrdenVenta(@PathVariable Long idEmpresa, @PathVariable Long idInversionista, @PathVariable Long idAccion){
+    public String crearOrdenVenta(@PathVariable Long idEmpresa, @PathVariable Long idInversionista, @PathVariable Long idAccion, RedirectAttributes redirectAttributes){
 
         OrdenSoloVenta ordenVenta = new OrdenSoloVenta();
         ordenVenta.setTipo("venta");
@@ -186,6 +181,8 @@ public class InversionistaControlador {
         ordenVenta.setFkAccion(idAccion);
         
         ordenVentaServicio.guardarOrdenVenta(ordenVenta);
+
+        redirectAttributes.addFlashAttribute("mensajeError6", true);
 
         return "redirect:/listarEmpresas";
     }
@@ -201,11 +198,15 @@ public class InversionistaControlador {
         return "listarOrdenes";
     }
 
-    @GetMapping("/cancelarOrden/{ordenId}")
-    public String cancelarOrden(@PathVariable Long ordenId){
-        Optional<OrdenCompraVenta> optOrdenCompra = ordenServicio.cancelarOrden(ordenId);
-        if(!optOrdenCompra.isPresent()){
+    @GetMapping("/cancelarOrden/{ordenId}/{tipoOrden}")
+    public String cancelarOrden(@PathVariable Long ordenId, @PathVariable int tipoOrden, RedirectAttributes redirectAttributes){
+
+        if(tipoOrden == 1){
+            ordenServicio.cancelarOrden(ordenId);
+            redirectAttributes.addFlashAttribute("mensajeError7", true);
+        }else{
             ordenVentaServicio.cancelarOrdenVenta(ordenId);
+            redirectAttributes.addFlashAttribute("mensajeError8", true);
         }
         return "redirect:/listarOrdenes";
     }

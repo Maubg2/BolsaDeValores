@@ -1,28 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="utf-8">
-<title>Listado empresas</title>
-<link rel="stylesheet"
-	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-	crossorigin="anonymous">
+    <meta charset="utf-8">
+    <title>Listado empresas</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        /* Estilo para el fondo del modal */
+        .modal, .modal2 {
+            display: none;
+            /* Inicialmente oculto */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Fondo semi-transparente */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilo para el contenido del modal */
+        .modal-content, .modal-content2 {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Estilo para el botón de cerrar */
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
 </head>
+
 <body>
 
-	<nav class="navbar navbar-expand-md bg-dark navbar-dark">
-		<a class="navbar-brand" href="#">Portal de inversionistas</a>
-		<div class="collapse navbar-collapse" id="collapsibleNavbar">
-			<ul class="navbar-nav">
-				<li class="nav-item"><a class="nav-link" th:href="@{/listarEmpresas}">Compra/Venta</a></li>
+    <nav class="navbar navbar-expand-md bg-dark navbar-dark">
+        <a class="navbar-brand" href="#">Portal de inversionistas</a>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" th:href="@{/listarEmpresas}">Compra/Venta</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/listarOrdenes}">Ordenes</a></li>
-				<li class="nav-item"><a class="nav-link" th:href="@{/generarReportes}">Reportes</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/generarReportes}">Reportes</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/index}">Cerrar sesión</a></li>
-			</ul>
-		</div>
-	</nav>   
-	<br>
-	
+            </ul>
+        </div>
+    </nav>
+    <br>
+
     <br>
     <div th:if="${not #lists.isEmpty(ordenes)}">
         <h3 class="text-center">Órdenes de compra</h3>
@@ -48,7 +90,8 @@
                     <td><span th:text="${orden.nombreInversionista} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreComisionista} ?: 'No hay '"></span></td>
                     <td>
-                        <a class="btn btn-primary" th:if="${orden.estado == 'pendiente'}" th:href="@{'/cancelarOrden/' + ${orden.id}}">Cancelar</a>
+                        <a class="btn btn-primary" th:if="${orden.estado == 'pendiente'}"
+                            th:href="@{'/cancelarOrden/' + ${orden.id} + '/1'}">Cancelar</a>
                     </td>
                 </tr>
             </tbody>
@@ -83,7 +126,8 @@
                     <td><span th:text="${orden.nombreInversionista} ?: 'No hay '"></span></td>
                     <td><span th:text="${orden.nombreComisionista} ?: 'No hay '"></span></td>
                     <td>
-                        <a class="btn btn-primary" th:if="${orden.estado == 'pendiente'}" th:href="@{'/cancelarOrden/' + ${orden.id}}">Cancelar</a>
+                        <a class="btn btn-primary" th:if="${orden.estado == 'pendiente'}"
+                            th:href="@{'/cancelarOrden/' + ${orden.id} + '/2'}">Cancelar</a>
                     </td>
                 </tr>
             </tbody>
@@ -91,7 +135,76 @@
     </div>
 
 
+    <!-- Modal personalizado -->
+    <div id="errorModal" class="modal" th:if="${mensajeError7}">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Orden de compra cancelada</h2>
+            <p>Ya no le llegará al comisionista</p>
+        </div>
+    </div>
+
+    <script th:if="${mensajeError7}">
+        // Muestra el modal si hay un mensaje de error
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("errorModal");
+            var closeBtn = document.querySelector(".close-btn");
+
+            // Mostrar el modal
+            modal.style.display = "flex";
+
+            // Cerrar el modal cuando se hace clic en el botón de cerrar
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Cerrar el modal cuando se hace clic fuera del contenido del modal
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        });
+    </script>
+
+
+
+
+    <!-- Modal personalizado -->
+    <div id="errorModal2" class="modal2" th:if="${mensajeError8}">
+        <div class="modal-content2">
+            <span class="close-btn">&times;</span>
+            <h2>Orden de venta cancelada</h2>
+            <p>Ya no le llegará al comisionista</p>
+        </div>
+    </div>
+
+    <script th:if="${mensajeError8}">
+        // Muestra el modal si hay un mensaje de error
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("errorModal2");
+            var closeBtn = document.querySelector(".close-btn");
+
+            // Mostrar el modal
+            modal.style.display = "flex";
+
+            // Cerrar el modal cuando se hace clic en el botón de cerrar
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Cerrar el modal cuando se hace clic fuera del contenido del modal
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        });
+    </script>
+
+
 
 
 </body>
+
 </html>

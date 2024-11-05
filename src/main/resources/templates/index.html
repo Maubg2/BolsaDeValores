@@ -23,11 +23,19 @@
                                 <button class="btn btn-success btn-block" type="submit">Registrar</button>
                             </div>
                         </form>
+                        <script th:if="${mensajeError2}">
+                            alert("El correo electrónico ya está registrado.");
+                        </script>
+                        <script th:if="${mensajeError3}">
+                            alert("Error, intente de nuevo.");
+                        </script>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+  
 
 </body>
 </html>
