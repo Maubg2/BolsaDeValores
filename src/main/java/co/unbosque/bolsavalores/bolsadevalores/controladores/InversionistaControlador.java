@@ -227,49 +227,22 @@ public class InversionistaControlador {
     public String generarReportes() {
         return "generarReportes";
     }
-/*
-    @GetMapping("/crearReporte")
-    public String enviarReporte(HttpSession session) {
-        // Obtener datos del inversionista autenticado
-        Inversionista inversionista = (Inversionista) session.getAttribute("inversionista");
 
-        String email = inversionista.getEmail();
-        List<OrdenCompraVenta> ordenes = ordenServicio.listarOrdenesPorInversionista(inversionista.getId());// obtenerMovimientosPorInversionista(inversionista.getId());
-        System.out.println("1111111111111111111111111111111111111111");
-        // Generar reporte PDF
-        byte[] reportePDF = reporteServicio.generarReportePDF(ordenes);
-        System.out.println("22222222222222222222222222222222222222222");
-
-        // Enviar el reporte por correo electrónico
-        emailServicio.enviarCorreoConReporte(email, reportePDF, "Reporte de Movimientos - Andina Trading");
-        System.out.println("33333333333333333333333333333333333333");
-
-        return "redirect:/generarReportes";
-    }
- */
     @GetMapping("/descargarReporte")
     public ResponseEntity<byte[]> descargarReporte(HttpSession session) {
         // Obtener datos del inversionista autenticado
         Inversionista inversionista = (Inversionista) session.getAttribute("inversionista");
 
-       
-
         List<OrdenCompraVenta> ordenes = ordenServicio.listarOrdenesPorInversionista(inversionista.getId());
+        List<OrdenSoloVenta> ordenesVenta = ordenVentaServicio.listarOrdenesVentaPorInversionista(inversionista.getId());
 
         // Generar reporte PDF
-        byte[] reportePDF = reporteServicio.generarReportePDF(ordenes);
+        byte[] reportePDF = reporteServicio.generarReportePDF(ordenes, ordenesVenta, inversionista);
 
         // Configurar encabezados para que el navegador interprete el contenido como un
         // archivo descargable
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-  /*      headers.setContentDisposition(ContentDisposition.builder("attachment")
-                .filename("reporte_inversionista_" + inversionista.getId() + ".pdf")
-                .build());
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(reportePDF); */
 
         headers.setContentDispositionFormData("attachment", "reporte.pdf"); // Especificar nombre del archivo
 

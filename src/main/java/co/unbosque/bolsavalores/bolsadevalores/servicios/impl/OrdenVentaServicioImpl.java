@@ -92,4 +92,9 @@ public class OrdenVentaServicioImpl implements OrdenVentaServicio{
         return ordenVentaRepositorio.getReferenceById(id);
     }
 
+    @Override
+    public List<OrdenSoloVenta> listarOrdenesVentaPorInversionista(Long idInversionista) {
+        return ordenVentaRepositorio.encontrarOrdenPorInversionista(idInversionista);
+    }
+
 }
