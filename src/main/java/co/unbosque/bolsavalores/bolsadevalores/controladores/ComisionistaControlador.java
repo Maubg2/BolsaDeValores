@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Accion;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Comisionista;
@@ -109,7 +110,7 @@ public class ComisionistaControlador {
     }
 
     @GetMapping("/listarOrdenesCom/{idOrden}")
-    public String aceptarOrden(@PathVariable Long idOrden, HttpSession session){
+    public String aceptarOrden(@PathVariable Long idOrden, HttpSession session, RedirectAttributes redirectAttributes){
 
         OrdenCompraVenta orden = ordenServicio.obtenerPorId(idOrden);
         
@@ -125,7 +126,7 @@ public class ComisionistaControlador {
             inversionista.setSaldo(inversionista.getSaldo() - empresa.getValorAccion());
             inversionistaServicio.guardarInversionista(inversionista);
 
-            comisionista.setSaldo(empresa.getValorAccion() * 0.10);
+            comisionista.setSaldo(comisionista.getSaldo() + empresa.getValorAccion() * 0.10);
             comisionistaServicio.guardarComisionista(comisionista);
 
             Accion accion = new Accion();
@@ -133,14 +134,15 @@ public class ComisionistaControlador {
             accion.setFkEmpresa(orden.getFkEmpresa());
             accion.setFkInversionista(orden.getFkComisionista());
             accionServicio.guardarAccion(accion);
-            
+
+            redirectAttributes.addFlashAttribute("mensajeError9", true);
         }
 
-        return "redirect:/portalComisionista";
+        return "redirect:/listarOrdenesCom";
     }
 
     @GetMapping("/listarOrdenesCom/{idOrden}/{idAccion}")
-    public String aceptarOrdenVenta(@PathVariable Long idOrden, @PathVariable Long idAccion, HttpSession session){
+    public String aceptarOrdenVenta(@PathVariable Long idOrden, @PathVariable Long idAccion, HttpSession session, RedirectAttributes redirectAttributes){
         
         OrdenSoloVenta ordenVenta = ordenVentaServicio.obtenerPorId(idOrden);
 
@@ -155,14 +157,36 @@ public class ComisionistaControlador {
         inversionista.setSaldo(inversionista.getSaldo() + empresa.getValorAccion());
         inversionistaServicio.guardarInversionista(inversionista);
 
-        comisionista.setSaldo(empresa.getValorAccion() * 0.10);
+        comisionista.setSaldo(comisionista.getSaldo() + empresa.getValorAccion() * 0.10);
         comisionistaServicio.guardarComisionista(comisionista);
 
         Accion accion = accionServicio.obtenerPorId(idAccion);
         accion.setFkInversionista(null);
         accionServicio.guardarAccion(accion);
 
-        return "redirect:/portalComisionista";
+        redirectAttributes.addFlashAttribute("mensajeError10", true);
+
+        return "redirect:/listarOrdenesCom";
+    }
+
+    @GetMapping("/rechazarOrdenCompra/{idOrden}")
+    public String rechazarOrdenCompra(@PathVariable Long idOrden, RedirectAttributes redirectAttributes){
+
+        OrdenCompraVenta ordenCompra = ordenServicio.obtenerPorId(idOrden);
+        ordenCompra.setEstado("rechazada");
+        ordenServicio.guardarOrden(ordenCompra);
+        redirectAttributes.addFlashAttribute("mensajeError11", true);
+        return "redirect:/listarOrdenesCom";
+    }
+
+    @GetMapping("/rechazarOrdenVenta/{idOrden}")
+    public String rechazarOrdenVenta(@PathVariable Long idOrden, RedirectAttributes redirectAttributes){
+
+        OrdenSoloVenta ordenVenta = ordenVentaServicio.obtenerPorId(idOrden);
+        ordenVenta.setEstado("rechazada");
+        ordenVentaServicio.guardarOrdenVenta(ordenVenta);
+        redirectAttributes.addFlashAttribute("mensajeError12", true);
+        return "redirect:/listarOrdenesCom";
     }
 
 }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <title>Generar reporte</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+</head>
+
+<body>
+
+    <h2>Perfil del Inversionista</h2>
+
+    <!-- Botón para enviar el reporte -->
+    <form th:action="@{/descargarReporte}" method="get">
+        <button type="submit">Enviar Reporte de Movimientos</button>
+    </form>
+
+ <!--   <div th:if="${param.enviado}">
+        <p>El reporte ha sido enviado a tu correo electrónico.</p>
+    </div>
+-->
+</body>
+
+</html>

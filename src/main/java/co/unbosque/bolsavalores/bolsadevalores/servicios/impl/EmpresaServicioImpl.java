@@ -65,8 +65,8 @@ public class EmpresaServicioImpl implements EmpresaServicio{
                 Empresa empresa = empresaRepositorio.getReferenceById(accion.getFkEmpresa());
 
                 inversionista.setSaldo(empresa.getVariacionAccion() > 0 ? 
-                    inversionista.getSaldo() + 1000 * empresa.getVariacionAccion() : 
-                    inversionista.getSaldo() - 1000 * empresa.getVariacionAccion());
+                    (inversionista.getSaldo() + (1000 * empresa.getVariacionAccion())) : 
+                    (inversionista.getSaldo() - (1000 * empresa.getVariacionAccion())));
                 
                 inversionistaRepositorio.save(inversionista);
             }
