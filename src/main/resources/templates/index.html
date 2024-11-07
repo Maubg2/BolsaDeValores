@@ -4,6 +4,22 @@
     <meta charset="utf-8">
     <title>Index</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2d6a4f;
+            color: #333;
+        }
+        .btn-primary {
+            background-color: #40916c;
+            border-color: #40916c;
+        }
+        .btn-primary:hover {
+            background-color: #2d6a4f;
+            border-color: #2d6a4f;
+        }
+    </style>
 </head>
 <body>
     
@@ -15,12 +31,12 @@
                         <h2 class="card-title text-center mb-4">Andina Trading</h2><br>
                         <form th:action="@{/login}" method="get">
                             <div class="form-group text-center">
-                                <button class="btn btn-success btn-block" type="submit">Ingresar</button>
+                                <button class="btn btn-primary btn-block" type="submit">Ingresar</button>
                             </div>
                         </form>
                         <form th:action="@{/registrar}" method="get">
                             <div class="form-group text-center">
-                                <button class="btn btn-success btn-block" type="submit">Registrar</button>
+                                <button class="btn btn-primary btn-block" type="submit">Registrar</button>
                             </div>
                         </form>
                         <script th:if="${mensajeError2}">
