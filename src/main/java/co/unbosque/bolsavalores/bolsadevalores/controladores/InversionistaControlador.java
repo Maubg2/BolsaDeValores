@@ -52,7 +52,7 @@ public class InversionistaControlador {
     @Autowired
     private AccionServicio accionServicio;
 
-    @Autowired
+    @Autowired  
     private OrdenVentaServicio ordenVentaServicio;
 
     @Autowired
@@ -74,18 +74,23 @@ public class InversionistaControlador {
     public String validarCredenciales(@ModelAttribute("inversionista") Inversionista inversionista,
             @ModelAttribute("comisionista") Comisionista comisionista, Model model, HttpSession session) {
 
-        Inversionista inversionistaBD = inversionistaServicio.obtenerPorEmail(inversionista.getEmail());
-        Comisionista comisionistaBD = comisionistaServicio.obtenerPorEmail(comisionista.getEmail());
+        try{
+            Inversionista inversionistaBD = inversionistaServicio.obtenerPorEmail(inversionista.getEmail());
+            Comisionista comisionistaBD = comisionistaServicio.obtenerPorEmail(comisionista.getEmail());
+    
+            if (inversionistaServicio.validarCredenciales(inversionista.getEmail(), inversionista.getContrasena())) {
+                session.setAttribute("inversionista", inversionistaBD);
+                return "redirect:/listarEmpresas";
+            } else if (comisionistaServicio.validarCredenciales(comisionista.getEmail(), comisionista.getContrasena())) {
+                session.setAttribute("comisionista", comisionistaBD);
+                return "redirect:/listarOrdenesCom";
+            } else {
+                model.addAttribute("mensajeError1", true);
+                return "login";
+            }
 
-        if (inversionistaServicio.validarCredenciales(inversionista.getEmail(), inversionista.getContrasena())) {
-            session.setAttribute("inversionista", inversionistaBD);
-            return "redirect:/listarEmpresas";
-        } else if (comisionistaServicio.validarCredenciales(comisionista.getEmail(), comisionista.getContrasena())) {
-            session.setAttribute("comisionista", comisionistaBD);
-            return "redirect:/portalComisionista";
-        } else {
-            model.addAttribute("mensajeError1", true);
-            return "login";
+        }catch(Exception e){
+            return "redirect:/index";
         }
     }
 
@@ -153,26 +158,32 @@ public class InversionistaControlador {
     public String crearOrden(@PathVariable Long idEmpresa, @PathVariable Long idInversionista,
             RedirectAttributes redirectAttributes, Model model) {
 
-        Inversionista inversionista = inversionistaServicio.obtenerPorId(idInversionista);
-        Empresa empresa = empresaServicio.obtenerPorId(idEmpresa);
+        try{
 
-        if (inversionista.getSaldo() >= empresa.getValorAccion()) {
-            OrdenCompraVenta orden = new OrdenCompraVenta();
-            orden.setTipo("compra");
-            orden.setEstado("pendiente");
-            orden.setFechaCreacion(new Date());
-            orden.setFkEmpresa(idEmpresa);
-            orden.setFkInversionista(idInversionista);
-            orden.setFkComisionista(1L);
-
-            ordenServicio.guardarOrden(orden);
-
-            redirectAttributes.addFlashAttribute("mensajeError4", true);
-
-            return "redirect:/listarEmpresas";
-        } else {
-            redirectAttributes.addFlashAttribute("mensajeError5", true);
-            return "redirect:/listarEmpresas";
+            Inversionista inversionista = inversionistaServicio.obtenerPorId(idInversionista);
+            Empresa empresa = empresaServicio.obtenerPorId(idEmpresa);
+    
+            if (inversionista.getSaldo() >= empresa.getValorAccion()) {
+                OrdenCompraVenta orden = new OrdenCompraVenta();
+                orden.setTipo("compra");
+                orden.setEstado("pendiente");
+                orden.setFechaCreacion(new Date());
+                orden.setFkEmpresa(idEmpresa);
+                orden.setFkInversionista(idInversionista);
+                orden.setFkComisionista(1L);
+                orden.setPrecioCompra(empresa.getValorAccion());
+    
+                ordenServicio.guardarOrden(orden);
+    
+                redirectAttributes.addFlashAttribute("mensajeError4", true);
+    
+                return "redirect:/listarEmpresas";
+            } else {
+                redirectAttributes.addFlashAttribute("mensajeError5", true);
+                return "redirect:/listarEmpresas";
+            }
+        }catch(Exception e){
+            return "redirect:/index";
         }
 
     }
@@ -181,18 +192,24 @@ public class InversionistaControlador {
     public String crearOrdenVenta(@PathVariable Long idEmpresa, @PathVariable Long idInversionista,
             @PathVariable Long idAccion, RedirectAttributes redirectAttributes) {
 
-        OrdenSoloVenta ordenVenta = new OrdenSoloVenta();
-        ordenVenta.setTipo("venta");
-        ordenVenta.setEstado("pendiente");
-        ordenVenta.setFechaCreacion(new Date());
-        ordenVenta.setFkEmpresa(idEmpresa);
-        ordenVenta.setFkInversionista(idInversionista);
-        ordenVenta.setFkComisionista(1L);
-        ordenVenta.setFkAccion(idAccion);
+        try{
 
-        ordenVentaServicio.guardarOrdenVenta(ordenVenta);
-
-        redirectAttributes.addFlashAttribute("mensajeError6", true);
+            OrdenSoloVenta ordenVenta = new OrdenSoloVenta();
+            ordenVenta.setTipo("venta");
+            ordenVenta.setEstado("pendiente");
+            ordenVenta.setFechaCreacion(new Date());
+            ordenVenta.setFkEmpresa(idEmpresa);
+            ordenVenta.setFkInversionista(idInversionista);
+            ordenVenta.setFkComisionista(1L);
+            ordenVenta.setFkAccion(idAccion);
+            ordenVenta.setPrecioVenta(empresaServicio.obtenerPorId(idEmpresa).getValorAccion());
+    
+            ordenVentaServicio.guardarOrdenVenta(ordenVenta);
+    
+            redirectAttributes.addFlashAttribute("mensajeError6", true);
+        }catch(Exception e){
+            return "redirect:/index";
+        }
 
         return "redirect:/listarEmpresas";
     }
@@ -213,19 +230,19 @@ public class InversionistaControlador {
     public String cancelarOrden(@PathVariable Long ordenId, @PathVariable int tipoOrden,
             RedirectAttributes redirectAttributes) {
 
-        if (tipoOrden == 1) {
-            ordenServicio.cancelarOrden(ordenId);
-            redirectAttributes.addFlashAttribute("mensajeError7", true);
-        } else {
-            ordenVentaServicio.cancelarOrdenVenta(ordenId);
-            redirectAttributes.addFlashAttribute("mensajeError8", true);
+        try{
+            if (tipoOrden == 1) {
+                ordenServicio.cancelarOrden(ordenId);
+                redirectAttributes.addFlashAttribute("mensajeError7", true);
+            } else {
+                ordenVentaServicio.cancelarOrdenVenta(ordenId);
+                redirectAttributes.addFlashAttribute("mensajeError8", true);
+            }
+
+        }catch(Exception e){
+            return "redirect:/index";
         }
         return "redirect:/listarOrdenes";
-    }
-
-    @GetMapping("/generarReportes")
-    public String generarReportes() {
-        return "generarReportes";
     }
 
     @GetMapping("/descargarReporte")
@@ -237,14 +254,14 @@ public class InversionistaControlador {
         List<OrdenSoloVenta> ordenesVenta = ordenVentaServicio.listarOrdenesVentaPorInversionista(inversionista.getId());
 
         // Generar reporte PDF
-        byte[] reportePDF = reporteServicio.generarReportePDF(ordenes, ordenesVenta, inversionista);
+        byte[] reportePDF = reporteServicio.generarReportePDF(ordenes, ordenesVenta, inversionista, null);
 
         // Configurar encabezados para que el navegador interprete el contenido como un
         // archivo descargable
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
 
-        headers.setContentDispositionFormData("attachment", "reporte.pdf"); // Especificar nombre del archivo
+        headers.setContentDispositionFormData("attachment", "ReporteInversionista.pdf");
 
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }

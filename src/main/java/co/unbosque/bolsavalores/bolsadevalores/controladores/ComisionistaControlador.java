@@ -5,6 +5,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +28,7 @@ import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.OrdenServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.OrdenVentaServicio;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.ReporteServicio;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -47,6 +52,9 @@ public class ComisionistaControlador {
     @Autowired
     private OrdenVentaServicio ordenVentaServicio;
 
+    @Autowired
+    private ReporteServicio reporteServicio;
+
     @GetMapping("/portalComisionista")
     public String portalComisionista(){
         return "portalComisionista";
@@ -68,11 +76,11 @@ public class ComisionistaControlador {
             dto.setFechaCreacion(orden.getFechaCreacion());
 
             Empresa empresa = empresaServicio.obtenerPorId(orden.getFkEmpresa());
-            Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
             dto.setNombreEmpresa(empresa != null ? empresa.getNombre() : "No hay");
-            dto.setValorAccion(empresa.getValorAccion());
+            dto.setValorAccion(orden.getPrecioCompra());
             dto.setVariacionAccion(empresa.getVariacionAccion());
-
+            
+            Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
             dto.setNombreInversionista(inversionista != null ? inversionista.getNombre() : "No hay");
             dto.setSaldo(inversionista.getSaldo());
 
@@ -91,11 +99,11 @@ public class ComisionistaControlador {
             dtoVenta.setFkAccion(orden.getFkAccion());
 
             Empresa empresa = empresaServicio.obtenerPorId(orden.getFkEmpresa());
-            Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
             dtoVenta.setNombreEmpresa(empresa != null ? empresa.getNombre() : "No hay");
-            dtoVenta.setValorAccion(empresa.getValorAccion());
+            dtoVenta.setValorAccion(orden.getPrecioVenta());
             dtoVenta.setVariacionAccion(empresa.getVariacionAccion());
-
+            
+            Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
             dtoVenta.setNombreInversionista(inversionista != null ? inversionista.getNombre() : "No hay");
             dtoVenta.setSaldo(inversionista.getSaldo());
 
@@ -112,59 +120,69 @@ public class ComisionistaControlador {
     @GetMapping("/listarOrdenesCom/{idOrden}")
     public String aceptarOrden(@PathVariable Long idOrden, HttpSession session, RedirectAttributes redirectAttributes){
 
-        OrdenCompraVenta orden = ordenServicio.obtenerPorId(idOrden);
-        
-        Empresa empresa = empresaServicio.obtenerPorId(orden.getFkEmpresa());
-        Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
-        Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
+        try{
 
-        if(inversionista.getSaldo() >= empresa.getValorAccion() && orden.getEstado().equals("pendiente")){
-            orden.setEstado("ejecutada");
-            orden.setFechaCreacion(new Date());
-            ordenServicio.guardarOrden(orden);
-
-            inversionista.setSaldo(inversionista.getSaldo() - empresa.getValorAccion());
-            inversionistaServicio.guardarInversionista(inversionista);
-
-            comisionista.setSaldo(comisionista.getSaldo() + empresa.getValorAccion() * 0.10);
-            comisionistaServicio.guardarComisionista(comisionista);
-
-            Accion accion = new Accion();
-            accion.setCantAcciones(1);
-            accion.setFkEmpresa(orden.getFkEmpresa());
-            accion.setFkInversionista(orden.getFkComisionista());
-            accionServicio.guardarAccion(accion);
-
-            redirectAttributes.addFlashAttribute("mensajeError9", true);
+            OrdenCompraVenta orden = ordenServicio.obtenerPorId(idOrden);
+            
+            Inversionista inversionista = inversionistaServicio.obtenerPorId(orden.getFkInversionista());
+            Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
+    
+            if(inversionista.getSaldo() >= orden.getPrecioCompra() && orden.getEstado().equals("pendiente")){
+                orden.setEstado("ejecutada");
+                orden.setFechaCreacion(new Date());
+                ordenServicio.guardarOrden(orden);
+    
+                inversionista.setSaldo(inversionista.getSaldo() - orden.getPrecioCompra());
+                inversionistaServicio.guardarInversionista(inversionista);
+    
+                comisionista.setSaldo(comisionista.getSaldo() + (orden.getPrecioCompra() * 0.10));
+                comisionistaServicio.guardarComisionista(comisionista);
+    
+                Accion accion = new Accion(); 
+                accion.setCantAcciones(1);
+                accion.setFkEmpresa(orden.getFkEmpresa());
+                accion.setFkInversionista(orden.getFkComisionista());
+                accionServicio.guardarAccion(accion);
+    
+                redirectAttributes.addFlashAttribute("mensajeError9", true);
+            }else{
+                redirectAttributes.addFlashAttribute("mensajeError13", true);
+            }
+        }catch(Exception e){
+            
+            return "redirect:index";
         }
-
         return "redirect:/listarOrdenesCom";
     }
 
     @GetMapping("/listarOrdenesCom/{idOrden}/{idAccion}")
     public String aceptarOrdenVenta(@PathVariable Long idOrden, @PathVariable Long idAccion, HttpSession session, RedirectAttributes redirectAttributes){
         
-        OrdenSoloVenta ordenVenta = ordenVentaServicio.obtenerPorId(idOrden);
+        try{
+            OrdenSoloVenta ordenVenta = ordenVentaServicio.obtenerPorId(idOrden);
+    
+            Inversionista inversionista = inversionistaServicio.obtenerPorId(ordenVenta.getFkInversionista());
+            Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
+    
+            ordenVenta.setEstado("ejecutada");
+            ordenVenta.setFechaCreacion(new Date());
+            ordenVentaServicio.guardarOrdenVenta(ordenVenta);
+    
+            inversionista.setSaldo(inversionista.getSaldo() + ordenVenta.getPrecioVenta());
+            inversionistaServicio.guardarInversionista(inversionista);
+    
+            comisionista.setSaldo(comisionista.getSaldo() + (ordenVenta.getPrecioVenta() * 0.10));
+            comisionistaServicio.guardarComisionista(comisionista);
+    
+            Accion accion = accionServicio.obtenerPorId(idAccion);
+            accion.setFkInversionista(null);
+            accionServicio.guardarAccion(accion);
+    
+            redirectAttributes.addFlashAttribute("mensajeError10", true);
 
-        Empresa empresa = empresaServicio.obtenerPorId(ordenVenta.getFkEmpresa());
-        Inversionista inversionista = inversionistaServicio.obtenerPorId(ordenVenta.getFkInversionista());
-        Comisionista comisionista = (Comisionista)session.getAttribute("comisionista");
-
-        ordenVenta.setEstado("ejecutada");
-        ordenVenta.setFechaCreacion(new Date());
-        ordenVentaServicio.guardarOrdenVenta(ordenVenta);
-
-        inversionista.setSaldo(inversionista.getSaldo() + empresa.getValorAccion());
-        inversionistaServicio.guardarInversionista(inversionista);
-
-        comisionista.setSaldo(comisionista.getSaldo() + empresa.getValorAccion() * 0.10);
-        comisionistaServicio.guardarComisionista(comisionista);
-
-        Accion accion = accionServicio.obtenerPorId(idAccion);
-        accion.setFkInversionista(null);
-        accionServicio.guardarAccion(accion);
-
-        redirectAttributes.addFlashAttribute("mensajeError10", true);
+        }catch(Exception e){
+            return "redirect:/index";
+        }
 
         return "redirect:/listarOrdenesCom";
     }
@@ -172,21 +190,49 @@ public class ComisionistaControlador {
     @GetMapping("/rechazarOrdenCompra/{idOrden}")
     public String rechazarOrdenCompra(@PathVariable Long idOrden, RedirectAttributes redirectAttributes){
 
-        OrdenCompraVenta ordenCompra = ordenServicio.obtenerPorId(idOrden);
-        ordenCompra.setEstado("rechazada");
-        ordenServicio.guardarOrden(ordenCompra);
-        redirectAttributes.addFlashAttribute("mensajeError11", true);
+        try{
+            OrdenCompraVenta ordenCompra = ordenServicio.obtenerPorId(idOrden);
+            ordenCompra.setEstado("rechazada");
+            ordenServicio.guardarOrden(ordenCompra);
+            redirectAttributes.addFlashAttribute("mensajeError11", true);
+
+        }catch(Exception e){
+            return "redirect:/index";
+        }
         return "redirect:/listarOrdenesCom";
     }
 
     @GetMapping("/rechazarOrdenVenta/{idOrden}")
     public String rechazarOrdenVenta(@PathVariable Long idOrden, RedirectAttributes redirectAttributes){
 
-        OrdenSoloVenta ordenVenta = ordenVentaServicio.obtenerPorId(idOrden);
-        ordenVenta.setEstado("rechazada");
-        ordenVentaServicio.guardarOrdenVenta(ordenVenta);
-        redirectAttributes.addFlashAttribute("mensajeError12", true);
+        try{
+            OrdenSoloVenta ordenVenta = ordenVentaServicio.obtenerPorId(idOrden);
+            ordenVenta.setEstado("rechazada");
+            ordenVentaServicio.guardarOrdenVenta(ordenVenta);
+            redirectAttributes.addFlashAttribute("mensajeError12", true);
+
+        }catch(Exception e){
+            return "redirect:/index";
+        }
         return "redirect:/listarOrdenesCom";
+    }
+
+    @GetMapping("/descargarReporteCom")
+    public ResponseEntity<byte[]> descargarReporteCom(HttpSession session){
+
+        Comisionista comisionista = (Comisionista) session.getAttribute("comisionista");
+        
+        List<OrdenCompraVenta> ordenesCompra = ordenServicio.listarOrdenesPorComisionista(comisionista.getId());
+        List<OrdenSoloVenta> ordenVenta = ordenVentaServicio.listarOrdenesVentaPorComisionista(comisionista.getId());
+
+        byte[] reportePDF = reporteServicio.generarReportePDF(ordenesCompra, ordenVenta, null, comisionista);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+
+        headers.setContentDispositionFormData("attachment", "ReporteComisionista.pdf"); 
+
+        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
 
 }

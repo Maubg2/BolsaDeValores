@@ -8,7 +8,7 @@
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <style>
         /* Estilo para el fondo del modal */
-        .modal, .modal2, .modal3, .modal4 {
+        .modal, .modal2, .modal3, .modal4, .modal5 {
             display: none;
             /* Inicialmente oculto */
             position: fixed;
@@ -24,7 +24,7 @@
         }
 
         /* Estilo para el contenido del modal */
-        .modal-content, .modal-content2, .modal-content3, .modal-content4 {
+        .modal-content, .modal-content2, .modal-content3, .modal-content4, .modal-content5 {
             background-color: #fefefe;
             padding: 20px;
             border: 1px solid #888;
@@ -57,6 +57,7 @@
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" th:href="@{/listarOrdenesCom}">Ordenes</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/descargarReporteCom}">Generar reporte</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/index}">Cerrar sesión</a></li>
             </ul>
         </div>
@@ -299,6 +300,40 @@
         });
     </script>
 
+
+
+
+    <!-- Modal personalizado -->
+    <div id="errorModal5" class="modal5" th:if="${mensajeError13}">
+        <div class="modal-content5">
+            <span class="close-btn">&times;</span>
+            <h2>Orden de compra rechazada</h2>
+            <p>El inversionista no cuenta con suficiente saldo</p>
+        </div>
+    </div>
+
+    <script th:if="${mensajeError13}">
+        // Muestra el modal si hay un mensaje de error
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("errorModal5");
+            var closeBtn = document.querySelector(".close-btn");
+
+            // Mostrar el modal
+            modal.style.display = "flex";
+
+            // Cerrar el modal cuando se hace clic en el botón de cerrar
+            closeBtn.onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Cerrar el modal cuando se hace clic fuera del contenido del modal
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            };
+        });
+    </script>
 
 
 

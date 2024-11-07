@@ -40,8 +40,11 @@ public class OrdenSoloVenta {
     @Column(name = "fk_accion")
     private Long fkAccion;
 
+    @Column(name = "precio_venta")
+    private Double precioVenta;
+
     public OrdenSoloVenta(Long id, String tipo, String estado, Date fechaCreacion, Long fkEmpresa, Long fkInversionista,
-            Long fkComisionista, Long fkAccion) {
+            Long fkComisionista, Long fkAccion, Double precioVenta) {
         this.id = id;
         this.tipo = tipo;
         this.estado = estado;
@@ -50,6 +53,7 @@ public class OrdenSoloVenta {
         this.fkInversionista = fkInversionista;
         this.fkComisionista = fkComisionista;
         this.fkAccion = fkAccion;
+        this.precioVenta = precioVenta;
     }
 
     public OrdenSoloVenta() {

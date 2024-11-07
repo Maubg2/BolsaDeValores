@@ -28,6 +28,9 @@ public class OrdenCompraVenta {
     @Column(name = "fecha_creacion")
     private Date fechaCreacion;
 
+    @Column(name = "precio_compra")
+    private Double precioCompra;
+
     @Column(name = "fk_empresa")
     private Long fkEmpresa;
 
@@ -37,12 +40,13 @@ public class OrdenCompraVenta {
     @Column(name = "fk_comisionista")
     private Long fkComisionista;
 
-    public OrdenCompraVenta(Long id, String tipo, String estado, Date fechaCreacion, Long fkEmpresa,
+    public OrdenCompraVenta(Long id, String tipo, String estado, Date fechaCreacion, Double precioCompra, Long fkEmpresa,
             Long fkInversionista, Long fkComisionista) {
         this.id = id;
         this.tipo = tipo;
         this.estado = estado;
         this.fechaCreacion = fechaCreacion;
+        this.precioCompra = precioCompra;
         this.fkEmpresa = fkEmpresa;
         this.fkInversionista = fkInversionista;
         this.fkComisionista = fkComisionista;

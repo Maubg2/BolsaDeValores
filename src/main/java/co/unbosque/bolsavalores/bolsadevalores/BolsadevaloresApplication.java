@@ -9,7 +9,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class BolsadevaloresApplication {
 
 	public static void main(String[] args) {
+		
 		SpringApplication.run(BolsadevaloresApplication.class, args);
+		
 	}
 
 }
