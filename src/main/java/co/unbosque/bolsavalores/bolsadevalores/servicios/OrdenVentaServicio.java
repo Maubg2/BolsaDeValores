@@ -24,4 +24,6 @@ public interface OrdenVentaServicio {
 
     public List<OrdenSoloVenta> listarOrdenesVentaPorInversionista(Long idInversionista);
 
+    public List<OrdenSoloVenta> listarTodasLasOrdenesVenta();
+
 }

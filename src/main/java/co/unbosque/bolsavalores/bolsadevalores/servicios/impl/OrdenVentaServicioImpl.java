@@ -97,4 +97,9 @@ public class OrdenVentaServicioImpl implements OrdenVentaServicio{
         return ordenVentaRepositorio.encontrarOrdenPorInversionista(idInversionista);
     }
 
+    @Override
+    public List<OrdenSoloVenta> listarTodasLasOrdenesVenta() {
+        return ordenVentaRepositorio.findAll();
+    }
+
 }

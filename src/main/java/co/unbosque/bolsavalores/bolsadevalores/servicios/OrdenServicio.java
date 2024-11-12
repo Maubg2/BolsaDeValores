@@ -22,4 +22,6 @@ public interface OrdenServicio {
 
     public Optional<OrdenCompraVenta> cancelarOrden(Long idOrden);
 
+    public List<OrdenCompraVenta> listarTodasLasOrdenesCompra();
+
 }

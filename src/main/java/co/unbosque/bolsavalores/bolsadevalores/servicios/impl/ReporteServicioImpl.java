@@ -19,7 +19,9 @@ import co.unbosque.bolsavalores.bolsadevalores.entidades.Empresa;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.Inversionista;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenCompraVenta;
 import co.unbosque.bolsavalores.bolsadevalores.entidades.OrdenSoloVenta;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.ComisionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
+import co.unbosque.bolsavalores.bolsadevalores.servicios.InversionistaServicio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.ReporteServicio;
 
 @Service
@@ -27,6 +29,12 @@ public class ReporteServicioImpl implements ReporteServicio{
 
     @Autowired
     private EmpresaServicio empresaServicio;
+
+    @Autowired
+    private InversionistaServicio inversionistaServicio;
+
+    @Autowired
+    private ComisionistaServicio comisionistaServicio;
 
     @Override
     public byte[] generarReportePDF(List<OrdenCompraVenta> ordenes, List<OrdenSoloVenta> ordenesVenta, Inversionista inversionista, Comisionista comisionista){
@@ -117,6 +125,100 @@ public class ReporteServicioImpl implements ReporteServicio{
             document.close();
 
             return out.toByteArray();
+
+        }catch(Exception e){
+            throw new RuntimeException("Error al generar reporte PDF", e);
+        }
+    }
+
+    @Override
+    public byte[] generarReportePDFEmpresa(List<OrdenCompraVenta> ordenes, List<OrdenSoloVenta> ordenesVenta) {
+   
+        Double cont = 0.0;
+        try(ByteArrayOutputStream out = new ByteArrayOutputStream()){
+            Document document = new Document();
+            PdfWriter.getInstance(document, out);
+            document.open();
+
+            Paragraph titulo = new Paragraph("Andina Trading", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20)); 
+            titulo.setAlignment(Element.ALIGN_CENTER);
+            titulo.setSpacingAfter(20);
+            document.add(titulo);
+
+            document.add(new Paragraph("Reporte de Movimientos"));
+            document.add(new Paragraph("Fecha: "+ new Date()));
+            document.add(new Paragraph("Ordenes de compra de todas las empresas"));
+            document.add(new Paragraph(" "));
+
+            PdfPTable table = new PdfPTable(6);
+            table.addCell("Estado");
+            table.addCell("Nombre");
+            table.addCell("Fecha");
+            table.addCell("Valor acción");
+            table.addCell("Inversionista");
+            table.addCell("Comisionista");
+
+            for(OrdenCompraVenta x : ordenes){
+
+                Empresa empresaReporte = empresaServicio.obtenerPorId(x.getFkEmpresa());
+                Inversionista inversionista = inversionistaServicio.obtenerPorId(x.getFkInversionista());
+                Comisionista comisionista = comisionistaServicio.obtenerPorId(x.getFkComisionista());
+   
+                table.addCell(x.getEstado());
+                table.addCell(empresaReporte.getNombre());
+                table.addCell(x.getFechaCreacion().toString());
+                table.addCell(x.getPrecioCompra().toString());
+                table.addCell(inversionista.getNombre());
+                table.addCell(comisionista.getNombre());
+            
+                cont += (x.getEstado().equals("ejecutada") ? x.getPrecioCompra() : 0);
+
+            }   
+
+            document.add(table);
+
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Monto total de órdenes de compra ejecutadas: " + cont));
+            cont = 0.0;
+
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Ordenes de venta para todas las empresas"));
+            document.add(new Paragraph(" "));
+
+            PdfPTable table2 = new PdfPTable(6);
+            table2.addCell("Estado");
+            table.addCell("Nombre");
+            table2.addCell("Fecha");
+            table2.addCell("Valor acción");
+            table2.addCell("Inversionista");
+            table2.addCell("Comisionista");
+
+            for(OrdenSoloVenta x : ordenesVenta){
+
+                Empresa empresaReporte = empresaServicio.obtenerPorId(x.getFkEmpresa());
+                Inversionista inversionista = inversionistaServicio.obtenerPorId(x.getFkInversionista());
+                Comisionista comisionista = comisionistaServicio.obtenerPorId(x.getFkComisionista());
+                    
+                table2.addCell(x.getEstado());
+                table2.addCell(empresaReporte.getNombre());
+                table2.addCell(x.getFechaCreacion().toString());
+                table2.addCell(x.getPrecioVenta().toString());
+                table2.addCell(inversionista.getNombre());
+                table2.addCell(comisionista.getNombre());
+            
+                cont += (x.getEstado().equals("ejecutada") ? x.getPrecioVenta() : 0);
+            
+
+            }
+            document.add(table2);
+
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Monto total de órdenes de venta ejecutadas: " + cont));
+
+            document.close();
+
+            return out.toByteArray();     
 
         }catch(Exception e){
             throw new RuntimeException("Error al generar reporte PDF", e);

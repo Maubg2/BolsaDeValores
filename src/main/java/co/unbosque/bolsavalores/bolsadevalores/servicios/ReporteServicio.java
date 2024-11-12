@@ -11,4 +11,6 @@ public interface ReporteServicio {
 
     public byte[] generarReportePDF(List<OrdenCompraVenta> ordenes, List<OrdenSoloVenta> ordenesVenta, Inversionista inversionista, Comisionista comisionista);
 
+    public byte[] generarReportePDFEmpresa(List<OrdenCompraVenta> ordenes, List<OrdenSoloVenta> ordenesVenta);
+
 }

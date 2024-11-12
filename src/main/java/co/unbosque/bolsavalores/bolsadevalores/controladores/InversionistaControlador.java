@@ -123,8 +123,16 @@ public class InversionistaControlador {
     public String listarEmpresas(Model model, HttpSession session) {
         List<Empresa> empresas = empresaServicio.listarEmpresas();
         Inversionista inversionista = (Inversionista) session.getAttribute("inversionista");
+        System.out.println("Inversionista "+inversionista.getNombre());
+        System.out.println(inversionista.getId());
 
         List<Accion> accionesPorInversionista = accionServicio.listarAccionesPorInversionista(inversionista.getId());
+
+        for(Accion p : accionesPorInversionista){
+            System.out.println(p.getFkEmpresa());
+            System.out.println(p.getFkInversionista());
+        }
+
         List<EmpresaConAccionDTO> empresasConAccion = new ArrayList<>();
 
         for (Accion x : accionesPorInversionista) {

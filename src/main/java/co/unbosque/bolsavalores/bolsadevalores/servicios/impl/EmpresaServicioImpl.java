@@ -14,6 +14,7 @@ import co.unbosque.bolsavalores.bolsadevalores.repositorios.AccionRepositorio;
 import co.unbosque.bolsavalores.bolsadevalores.repositorios.EmpresaRepositorio;
 import co.unbosque.bolsavalores.bolsadevalores.repositorios.InversionistaRepositorio;
 import co.unbosque.bolsavalores.bolsadevalores.servicios.EmpresaServicio;
+import jakarta.transaction.Transactional;
 
 @Service
 public class EmpresaServicioImpl implements EmpresaServicio{
@@ -40,6 +41,7 @@ public class EmpresaServicioImpl implements EmpresaServicio{
     }
 
     @Override
+    @Transactional
     @Scheduled(fixedRate = 10000)
     public void actualizarValorDeAccion() {
         List<Empresa> empresas = empresaRepositorio.findAll();

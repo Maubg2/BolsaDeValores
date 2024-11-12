@@ -111,4 +111,9 @@ public class OrdenServicioImpl implements OrdenServicio{
         return optOrden;
     }
 
+    @Override
+    public List<OrdenCompraVenta> listarTodasLasOrdenesCompra() {
+        return ordenRepositorio.findAll();
+    }
+
 }

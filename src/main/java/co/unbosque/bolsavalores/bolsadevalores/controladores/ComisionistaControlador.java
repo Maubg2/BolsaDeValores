@@ -141,7 +141,8 @@ public class ComisionistaControlador {
                 Accion accion = new Accion(); 
                 accion.setCantAcciones(1);
                 accion.setFkEmpresa(orden.getFkEmpresa());
-                accion.setFkInversionista(orden.getFkComisionista());
+                accion.setFkInversionista(orden.getFkInversionista());
+                
                 accionServicio.guardarAccion(accion);
     
                 redirectAttributes.addFlashAttribute("mensajeError9", true);
@@ -231,6 +232,24 @@ public class ComisionistaControlador {
         headers.setContentType(MediaType.APPLICATION_PDF);
 
         headers.setContentDispositionFormData("attachment", "ReporteComisionista.pdf"); 
+
+        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/descargarReporteEmpresa")
+    public ResponseEntity<byte[]> descargarReporteEmpresa(HttpSession session){
+
+      
+        
+        List<OrdenCompraVenta> ordenesCompra = ordenServicio.listarTodasLasOrdenesCompra();
+        List<OrdenSoloVenta> ordenVenta = ordenVentaServicio.listarTodasLasOrdenesVenta();
+
+        byte[] reportePDF = reporteServicio.generarReportePDFEmpresa(ordenesCompra, ordenVenta);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+
+        headers.setContentDispositionFormData("attachment", "ReporteEmpresas.pdf"); 
 
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
     }
